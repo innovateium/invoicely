@@ -2,7 +2,7 @@
 "use client";
 
 import { ZodCreateInvoiceSchema } from "@/zod-schemas/invoice/create-invoice";
-import { Document, Page, Text, View, Image, Font } from "@react-pdf/renderer";
+import { Document, Font, Image, Page, Text, View } from "@react-pdf/renderer";
 import { getSubTotalValue, getTotalValue } from "@/constants/pdf-helpers";
 import { GEIST_FONT, GEIST_MONO_FONT } from "@/constants/pdf-fonts";
 import { formatCurrencyText } from "@/constants/currency";
@@ -43,13 +43,17 @@ const tw = createTw({
 });
 
 // Invoice PDF Document component
-const VercelPdf: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
+const VercelPdf: React.FC<{ data: ZodCreateInvoiceSchema; mode?: "invoice" | "receipt" }> = ({
+  data,
+  mode = "invoice",
+}) => {
+  const isReceipt = mode === "receipt";
   const subtotal = getSubTotalValue(data);
   const total = getTotalValue(data);
 
   return (
     <Document
-      title={`Invoice-${data.invoiceDetails.prefix}${data.invoiceDetails.serialNumber}`}
+      title={`${isReceipt ? "Receipt" : "Invoice"}-${data.invoiceDetails.prefix}${data.invoiceDetails.serialNumber}`}
       author={data.companyDetails.name}
       creator={data.companyDetails.name}
       producer="Invoicely"
@@ -57,7 +61,7 @@ const VercelPdf: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
       <Page size="A4" style={tw(cn("font-default text-sm text-black bg-background border border-borderColor"))}>
         <View style={tw("flex flex-row border-b border-borderColor p-4")}>
           <Text style={tw(cn("font-medium text-[40px] leading-[40px] tracking-tighter text-neutral-100"))}>
-            {data.invoiceDetails.prefix}
+            {isReceipt ? "Receipt " : data.invoiceDetails.prefix}
             <Text style={tw(cn("font-geistmono tracking-tighter text-neutral-100"))}>
               {data.invoiceDetails.serialNumber}
             </Text>
@@ -67,7 +71,9 @@ const VercelPdf: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
           {/* Invoice Details */}
           <View style={tw("flex flex-col gap-1 p-4 pr-8 border-r border-borderColor")}>
             <View style={tw("flex flex-row items-center gap-1")}>
-              <Text style={tw("text-2xs min-w-[100px] text-neutral-700")}>Serial Number</Text>
+              <Text style={tw("text-2xs min-w-[100px] text-neutral-700")}>
+                {isReceipt ? "Receipt Number" : "Serial Number"}
+              </Text>
               <Text style={tw("text-2xs font-normal text-neutral-300")}>{data.invoiceDetails.serialNumber}</Text>
             </View>
             <View style={tw("flex flex-row items-center gap-1")}>
@@ -111,7 +117,7 @@ const VercelPdf: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
         {/* Invoice billing details */}
         <View style={tw("flex flex-row w-full gap-2.5 border-b border-borderColor")}>
           <View style={tw(cn("flex flex-col gap-1.5 p-4 w-1/2"))}>
-            <Text style={tw(cn("text-neutral-600"))}>Billed By</Text>
+            <Text style={tw(cn("text-neutral-600"))}>{isReceipt ? "Receipt From" : "Billed By"}</Text>
             <Text style={tw("text-sm text-neutral-100")}>{data.companyDetails.name}</Text>
             <Text style={tw("text-2xs font-normal text-neutral-400")}>{data.companyDetails.address}</Text>
             {data.companyDetails.metadata.map((metadata) => (
@@ -122,7 +128,7 @@ const VercelPdf: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
             ))}
           </View>
           <View style={tw(cn("flex flex-col gap-1.5 p-4 w-1/2 border-l border-borderColor"))}>
-            <Text style={tw(cn("text-neutral-600"))}>Billed To</Text>
+            <Text style={tw(cn("text-neutral-600"))}>{isReceipt ? "Receipt To" : "Billed To"}</Text>
             <Text style={tw("text-sm text-neutral-100")}>{data.clientDetails.name}</Text>
             <Text style={tw("text-2xs font-normal text-neutral-400")}>{data.clientDetails.address}</Text>
             {data.clientDetails.metadata.map((metadata) => (
@@ -254,13 +260,15 @@ const VercelPdf: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
               })}
             </View>
             <View style={tw("flex flex-row items-center justify-between border-t border-borderColor p-4")}>
-              <Text style={tw("text-xs text-neutral-500")}>Total</Text>
+              <Text style={tw("text-xs text-neutral-500")}>{isReceipt ? "Total Paid" : "Total"}</Text>
               <Text style={tw("text-lg leading-[16px] font-geistmono tracking-tight text-white")}>
                 {formatCurrencyText(data.invoiceDetails.currency, total)}
               </Text>
             </View>
             <View style={tw("flex flex-col gap-0.5 p-4 border-t border-borderColor")}>
-              <Text style={tw("text-3xs font-normal text-neutral-500")}>Invoice Total (in words)</Text>
+              <Text style={tw("text-3xs font-normal text-neutral-500")}>
+                {isReceipt ? "Receipt Total" : "Invoice Total"} (in words)
+              </Text>
               <Text style={tw("text-2xs font-normal text-neutral-300")}>{toWords(total)}</Text>
             </View>
           </View>

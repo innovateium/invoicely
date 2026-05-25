@@ -1,4 +1,5 @@
 import { updateInvoiceStatus } from "./updateInvoiceStatus";
+import { duplicateInvoice } from "./duplicateInvoice";
 import { insertInvoice } from "./insertInvoice";
 import { deleteInvoice } from "./deleteInvoice";
 import { createTRPCRouter } from "@/trpc/init";
@@ -15,4 +16,5 @@ export const invoiceRouter = createTRPCRouter({
   get: getInvoice,
   edit: editInvoice,
   migrateToDb: migrateToDb,
+  duplicate: duplicateInvoice,
 });

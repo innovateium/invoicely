@@ -6,12 +6,13 @@ import { pdf } from "@react-pdf/renderer";
 interface CreatePdfBlobProps {
   template: PdfTemplateName;
   invoiceData: ZodCreateInvoiceSchema;
+  mode?: "invoice" | "receipt";
 }
 
-export const createPdfBlob = async ({ invoiceData, template }: CreatePdfBlobProps) => {
+export const createPdfBlob = async ({ invoiceData, template, mode = "invoice" }: CreatePdfBlobProps) => {
   const Template = getPdfTemplate(template);
 
-  const pdfDocument = <Template data={invoiceData} />;
+  const pdfDocument = <Template data={invoiceData} mode={mode} />;
   const blob = await pdf(pdfDocument).toBlob();
 
   return blob;

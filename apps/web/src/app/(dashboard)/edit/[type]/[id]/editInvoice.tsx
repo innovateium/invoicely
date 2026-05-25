@@ -5,16 +5,17 @@ import type { InvoiceTypeType } from "@invoicely/db/schema/invoice";
 import InvoicePage from "@/app/(dashboard)/create/invoice/invoice";
 import { getInvoiceById } from "@/lib/indexdb-queries/invoice";
 import PDFLoading from "@/components/layout/pdf/pdf-loading";
-import React, { useEffect, useState } from "react";
 import { Invoice } from "@/types/common/invoice";
 import { trpcProxyClient } from "@/trpc/client";
+import { useEffect, useState } from "react";
 
 interface EditInvoiceProps {
   type: InvoiceTypeType;
   id: string;
+  mode?: "invoice" | "receipt";
 }
 
-const EditInvoice = ({ type, id }: EditInvoiceProps) => {
+const EditInvoice = ({ type, id, mode = "invoice" }: EditInvoiceProps) => {
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -69,7 +70,7 @@ const EditInvoice = ({ type, id }: EditInvoiceProps) => {
     );
   }
 
-  return <InvoicePage defaultInvoice={invoice?.invoiceFields} />;
+  return <InvoicePage defaultInvoice={invoice?.invoiceFields} mode={mode} />;
 };
 
 export default EditInvoice;

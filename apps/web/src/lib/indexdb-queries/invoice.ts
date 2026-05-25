@@ -74,3 +74,37 @@ export const updateInvoice = async (id: string, invoice: ZodCreateInvoiceSchema)
     invoiceFields: invoice,
   });
 };
+
+/**
+ * Duplicate an invoice in the database
+ * @param id - The id of the invoice to duplicate
+ * @returns {Promise<string>} - The id of the new invoice
+ */
+export const duplicateInvoice = async (id: string): Promise<string> => {
+  const db = await initIndexedDB();
+
+  const oldInvoice = await db.get(IDB_SCHEMA_INVOICES, id);
+
+  if (!oldInvoice) {
+    throw new Error(ERROR_MESSAGES.INVOICE_NOT_FOUND);
+  }
+
+  const newId = uuidv4();
+
+  await db.put(IDB_SCHEMA_INVOICES, {
+    ...oldInvoice,
+    id: newId,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    invoiceFields: {
+      ...oldInvoice.invoiceFields,
+      invoiceDetails: {
+        ...oldInvoice.invoiceFields.invoiceDetails,
+        serialNumber: `${oldInvoice.invoiceFields.invoiceDetails.serialNumber}-copy`,
+        date: new Date(),
+      },
+    },
+  });
+
+  return newId;
+};

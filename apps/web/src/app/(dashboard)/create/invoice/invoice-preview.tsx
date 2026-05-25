@@ -66,7 +66,13 @@ const PDFViewer = ({ url, width }: { url: string | null; width: number }) => {
   );
 };
 
-const InvoicePreview = ({ form }: { form: UseFormReturn<ZodCreateInvoiceSchema> }) => {
+const InvoicePreview = ({
+  form,
+  mode = "invoice",
+}: {
+  form: UseFormReturn<ZodCreateInvoiceSchema>;
+  mode?: "invoice" | "receipt";
+}) => {
   const isClient = useMounted();
   const [resizeRef, container] = useResizeObserver();
   const setInvoiceError = useSetAtom(invoiceErrorAtom);
@@ -115,7 +121,11 @@ const InvoicePreview = ({ form }: { form: UseFormReturn<ZodCreateInvoiceSchema> 
 
     (async () => {
       try {
-        const blob = await createPdfBlob({ invoiceData: data, template: form.watch("invoiceDetails.theme.template") });
+        const blob = await createPdfBlob({
+          invoiceData: data,
+          template: form.watch("invoiceDetails.theme.template"),
+          mode,
+        });
         const newUrl = createBlobUrl({ blob });
 
         setGeneratedPdfUrl(newUrl);

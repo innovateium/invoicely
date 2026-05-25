@@ -1,6 +1,7 @@
 import {
   BoxIcon,
   CalendarCheckIcon,
+  CalendarPenIcon,
   DatabaseIcon,
   FileAlertIcon,
   FileBanIcon,
@@ -21,9 +22,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { createColumnConfigHelper } from "@/components/ui/data-table-filter/core/filters";
-import { HeaderColumnButton, FormatTableDateObject } from "@/components/ui/data-table";
+import { FormatTableDateObject, HeaderColumnButton } from "@/components/ui/data-table";
 import type { InvoiceStatusType } from "@invoicely/db/schema/invoice";
+import DuplicateInvoiceAction from "./duplicateInvoiceAction";
 import { Badge, BadgeVariants } from "@/components/ui/badge";
+import GenerateReceiptAction from "./generateReceiptAction";
 import { createColumnHelper } from "@tanstack/react-table";
 import { getTotalValue } from "@/constants/pdf-helpers";
 import getSymbolFromCurrency from "currency-symbol-map";
@@ -31,7 +34,6 @@ import DeleteInvoiceModal from "./deleteInvoiceModal";
 import UpdateStatusModal from "./updateStatusModal";
 import MigrateToDbModal from "./migrateToDbModal";
 import { Invoice } from "@/types/common/invoice";
-import { CalendarPenIcon } from "@/assets/icons";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -149,6 +151,8 @@ export const columns = [
               {type === "local" && (
                 <MigrateToDbModal invoiceId={id} invoiceFields={invoiceFields} status={status} paidAt={paidAt} />
               )}
+              <DuplicateInvoiceAction invoiceId={id} type={type as "local" | "server"} />
+              <GenerateReceiptAction invoiceId={id} type={type as "local" | "server"} />
               <DeleteInvoiceModal invoiceId={id} type={type} />
             </DropdownMenuContent>
           </DropdownMenu>

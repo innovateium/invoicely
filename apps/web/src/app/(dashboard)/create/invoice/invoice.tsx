@@ -12,15 +12,21 @@ import { invoiceTabAtom } from "@/global/atoms/invoice-atom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Invoice } from "@/types/common/invoice";
 import { useIsMobile } from "@/hooks/use-mobile";
-import React, { useEffect, useRef } from "react";
 import { PdfWorkerProvider } from "@/providers";
 import InvoicePreview from "./invoice-preview";
 import { useForm } from "react-hook-form";
+import { useEffect, useRef } from "react";
 import InvoiceForm from "./invoice-form";
 import { cn } from "@/lib/utils";
 import { useAtom } from "jotai";
 
-const InvoicePage = ({ defaultInvoice }: { defaultInvoice?: Invoice["invoiceFields"] }) => {
+const InvoicePage = ({
+  defaultInvoice,
+  mode = "invoice",
+}: {
+  defaultInvoice?: Invoice["invoiceFields"];
+  mode?: "invoice" | "receipt";
+}) => {
   const invoiceFormPanelRef = useRef<ImperativePanelHandle>(null);
   const invoicePreviewPanelRef = useRef<ImperativePanelHandle>(null);
   const [invoiceTab, setInvoiceTab] = useAtom(invoiceTabAtom);
@@ -88,7 +94,7 @@ const InvoicePage = ({ defaultInvoice }: { defaultInvoice?: Invoice["invoiceFiel
           ref={invoicePreviewPanelRef}
         >
           <PdfWorkerProvider>
-            <InvoicePreview form={form} />
+            <InvoicePreview form={form} mode={mode} />
           </PdfWorkerProvider>
         </ResizablePanel>
       </ResizablePanelGroup>

@@ -3,7 +3,7 @@
 
 import { GEIST_MONO_FONT, JETBRAINS_MONO_FONT, QUICKSAND_FONT } from "@/constants/pdf-fonts";
 import { ZodCreateInvoiceSchema } from "@/zod-schemas/invoice/create-invoice";
-import { Document, Page, Text, View, Image, Font } from "@react-pdf/renderer";
+import { Document, Font, Image, Page, Text, View } from "@react-pdf/renderer";
 import { getSubTotalValue, getTotalValue } from "@/constants/pdf-helpers";
 import { formatCurrencyText } from "@/constants/currency";
 import { createTw } from "react-pdf-tailwind";
@@ -48,7 +48,11 @@ const tw = createTw({
 });
 
 // Invoice PDF Document component
-const DefaultPDF: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
+const DefaultPDF: React.FC<{ data: ZodCreateInvoiceSchema; mode?: "invoice" | "receipt" }> = ({
+  data,
+  mode = "invoice",
+}) => {
+  const isReceipt = mode === "receipt";
   const darkMode = data.invoiceDetails.theme.mode === "dark";
   // Calculate totals
   const subtotal = getSubTotalValue(data);
@@ -56,7 +60,7 @@ const DefaultPDF: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
 
   return (
     <Document
-      title={`Invoice-${data.invoiceDetails.prefix}${data.invoiceDetails.serialNumber}`}
+      title={`${isReceipt ? "Receipt" : "Invoice"}-${data.invoiceDetails.prefix}${data.invoiceDetails.serialNumber}`}
       author={data.companyDetails.name}
       creator={data.companyDetails.name}
       producer="Invoicely"
@@ -75,7 +79,7 @@ const DefaultPDF: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
                 ),
               )}
             >
-              {data.invoiceDetails.prefix}
+              {isReceipt ? "Receipt " : data.invoiceDetails.prefix}
               {data.invoiceDetails.serialNumber}
             </Text>
           </View>
@@ -84,7 +88,9 @@ const DefaultPDF: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
           {/* Invoice Details */}
           <View style={tw("flex flex-col gap-1")}>
             <View style={tw("flex flex-row items-center gap-1")}>
-              <Text style={tw("text-2xs font-semibold min-w-[100px]")}>Serial Number</Text>
+              <Text style={tw("text-2xs font-semibold min-w-[100px]")}>
+                {isReceipt ? "Receipt Number" : "Serial Number"}
+              </Text>
               <Text style={tw("text-2xs font-normal text-neutral-500")}>{data.invoiceDetails.serialNumber}</Text>
             </View>
             <View style={tw("flex flex-row items-center gap-1")}>
@@ -133,7 +139,7 @@ const DefaultPDF: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
             <Text
               style={tw(cn("font-semibold", darkMode ? "text-white" : `text-[${data.invoiceDetails.theme.baseColor}]`))}
             >
-              Billed By
+              {isReceipt ? "Receipt From" : "Billed By"}
             </Text>
             <Text style={tw("text-2xs font-semibold")}>{data.companyDetails.name}</Text>
             <Text style={tw("text-2xs font-normal text-neutral-500")}>{data.companyDetails.address}</Text>
@@ -150,7 +156,7 @@ const DefaultPDF: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
             <Text
               style={tw(cn("font-semibold", darkMode ? "text-white" : `text-[${data.invoiceDetails.theme.baseColor}]`))}
             >
-              Billed To
+              {isReceipt ? "Receipt To" : "Billed To"}
             </Text>
             <Text style={tw("text-2xs font-semibold")}>{data.clientDetails.name}</Text>
             <Text style={tw("text-2xs font-normal text-neutral-500")}>{data.clientDetails.address}</Text>
@@ -310,13 +316,15 @@ const DefaultPDF: React.FC<{ data: ZodCreateInvoiceSchema }> = ({ data }) => {
               style={tw(cn("border-b mt-1.5 mb-1.5", darkMode ? "border-neutral-800" : "border-neutral-200"))}
             ></View>
             <View style={tw("flex flex-row items-center justify-between")}>
-              <Text style={tw("text-xs font-semibold")}>Total</Text>
+              <Text style={tw("text-xs font-semibold")}>{isReceipt ? "Total Paid" : "Total"}</Text>
               <Text style={tw("text-lg font-geistmono tracking-tight")}>
                 {formatCurrencyText(data.invoiceDetails.currency, total)}
               </Text>
             </View>
             <View style={tw("flex flex-col gap-0.5 mt-1")}>
-              <Text style={tw("text-3xs font-normal text-neutral-500")}>Invoice Total (in words)</Text>
+              <Text style={tw("text-3xs font-normal text-neutral-500")}>
+                {isReceipt ? "Receipt Total" : "Invoice Total"} (in words)
+              </Text>
               <Text style={tw("text-2xs font-normal")}>{toWords(total)}</Text>
             </View>
           </View>
